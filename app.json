@@ -9,13 +9,23 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs acces to your camera",
+        "NSMicrophoneUsageDescription": "$(PRODUCT_NAME) needs acces to your microphone"
+      },
+      "bundleIdentifier": "com.raucheacho.posycam"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.raucheacho.posycam"
     },
     "web": {
       "bundler": "metro",
@@ -24,6 +34,14 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "$(PRODUCT_NAME) needs acces to your camera",
+          "enableMicrophonePermission": true,
+          "microphonePermissionText": "$(PRODUCT_NAME) needs acces to your microphone"
+        }
+      ],
       [
         "expo-splash-screen",
         {
