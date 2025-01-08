@@ -1,5 +1,5 @@
 import React from "react";
-import { TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity } from "react-native";
 import { LucideIcon } from "lucide-react-native";
 
 type IconButtonVariant =
@@ -22,10 +22,10 @@ type IconButtonSize =
   | "6xl";
 
 const iconButtonVariants: Record<IconButtonVariant, string> = {
-  default: "bg-black",
+  default: "bg-orangina",
   destructive: "bg-red-500",
-  outline: "bg-transparent border border-black",
-  secondary: "bg-gray-200",
+  outline: "bg-transparent border border-orangina",
+  secondary: "bg-[#303030]",
   ghost: "bg-transparent",
   link: "bg-transparent",
 };
@@ -42,11 +42,13 @@ const iconButtonSizes: Record<
   "3xl": { container: "p-4", iconSize: 56 },
   "4xl": { container: "p-4", iconSize: 64 },
   "5xl": { container: "p-4", iconSize: 72 },
-  "6xl": { container: "p-4", iconSize: 96 },
+  "6xl": { container: "p-4", iconSize: 86 },
 };
 
 interface IconButtonProps {
-  icon: LucideIcon;
+  icon?: LucideIcon;
+  textAsIcon?: string;
+  textAsIconColor?: string;
   onPress?: () => void;
   variant?: IconButtonVariant;
   size?: IconButtonSize;
@@ -58,6 +60,8 @@ interface IconButtonProps {
 
 const IconButton: React.FC<IconButtonProps> = ({
   icon: Icon,
+  textAsIcon,
+  textAsIconColor,
   onPress,
   variant = "default",
   size = "md",
@@ -78,11 +82,18 @@ const IconButton: React.FC<IconButtonProps> = ({
       onPress={onPress}
       disabled={disabled}
     >
-      <Icon
-        size={iconButtonSizes[size].iconSize}
-        color={iconColor || (variant === "default" ? "white" : "black")}
-        strokeWidth={iconStrokeWidth}
-      />
+      {Icon && (
+        <Icon
+          size={iconButtonSizes[size].iconSize}
+          color={iconColor || (variant === "default" ? "white" : "black")}
+          strokeWidth={iconStrokeWidth}
+        />
+      )}
+      {textAsIcon && (
+        <Text className={`${textAsIconColor || "text-white text-xs"}`}>
+          {textAsIcon}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };

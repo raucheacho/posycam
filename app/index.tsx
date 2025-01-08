@@ -22,10 +22,19 @@ import {
   Grid2X2,
   ImageIcon,
   SwitchCameraIcon,
+  ProportionsIcon,
   ZapIcon,
   ZapOffIcon,
+  CircleFadingPlusIcon,
+  ClockIcon,
 } from "lucide-react-native";
 import { RenderGrid } from "@/components/overlays/RenderGrid";
+import Modes from "@/components/modes/Modes";
+import { toggleAspect, toggleFlash, toggleGrid } from "@/actions/modeActions";
+import ModeItem from "@/components/modes/ModeItem";
+import { ModeItemType } from "@/types";
+import { takePicture } from "@/actions/cameraActions";
+
 // import SkiaCameraControls from "@/components/Controls";
 
 const AppScreen = () => {
@@ -45,50 +54,38 @@ const AppScreen = () => {
   const cameraRef = useRef<Camera>(null);
   const gridRef = useRef<any>(null);
 
-  const handleToggleGrid = () => {
-    console.log("eeee");
-    if (gridRef.current) {
-      gridRef.current.toggleGridType();
-      // Call the toggle function
-    }
-  };
-  const toggleFlash = () => {
-    setFlash((prevFlash) => {
-      switch (prevFlash) {
-        case "on":
-          return "off";
-        case "off":
-          return "auto";
-        case "auto":
-          return "on";
-        default:
-          return "off"; // Default case if something goes wrong
-      }
-    });
-  };
-
-  const takePicture = async () => {
-    try {
-      if (cameraRef.current == null)
-        throw new Error("Un probleme est survenue");
-      const photo = await cameraRef.current.takePhoto({
-        flash: flash,
-        enableShutterSound: true,
-      });
-      // const video = await cameraRef.current.startRecording({
-      //   onRecordingFinished: (video) => console.log(video),
-      //   onRecordingError: (error) => console.error(error),
-      // });
-      router.push({
-        pathname: "/edition",
-        params: {
-          media: photo.path,
-        },
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const modes: ModeItemType[] = [
+    {
+      name: "flash",
+      icon: flash === "off" ? ZapOffIcon : ZapIcon,
+      onPress: () => toggleFlash(setFlash),
+    },
+    {
+      name: "aspect",
+      textAsIcon: "16:9",
+      onPress: () => toggleAspect(),
+    },
+    {
+      name: "zoom",
+      textAsIcon: "zoom",
+      onPress: () => {},
+    },
+    {
+      name: "zoom",
+      icon: CircleFadingPlusIcon,
+      onPress: () => {},
+    },
+    {
+      name: "Grid",
+      icon: Grid2X2,
+      onPress: () => toggleGrid(gridRef),
+    },
+    {
+      name: "Minuteur",
+      icon: ClockIcon,
+      onPress: () => {},
+    },
+  ];
 
   useEffect(() => {
     const checkMicrophonePermission = async () => {
@@ -125,7 +122,7 @@ const AppScreen = () => {
   return (
     <SafeAreaView
       style={Platform.OS === "android" ? { marginTop: 40 } : { marginTop: 0 }}
-      className="flex-1 bg-white"
+      className="flex-1 bg-black"
     >
       <View className="flex-1 p-2">
         <View
@@ -151,46 +148,45 @@ const AppScreen = () => {
             //video
           />
           <View className="flex-row justify-between p-5 items-center">
-            <View className="flex-row gap-5 bg-black p-2 rounded-full z-40 opacity-60">
-              <View className="relative">
-                {flash === "auto" && (
-                  <View className="absolute z-40 transform translate-x-6 -mt-1 border border-black bg-gray-200 w-4 h-4 rounded-full justify-center items-center">
-                    <Text className="text-black text-[8px]">A</Text>
-                  </View>
-                )}
-                <IconButton
-                  className="w-8 h-8"
+            <View className="flex-row items-center gap-5">
+              <View className="flex-row gap-2 px-2 bg-secondary  rounded-full z-40 opacity-40 items-center">
+                {/* <IconButton
+                  className="w-8 h-8 transform rotate-45"
                   size="sm"
-                  variant={`${
-                    flash === "on" || flash === "auto" ? "secondary" : "default"
-                  }`}
-                  icon={flash === "off" ? ZapOffIcon : ZapIcon}
-                  iconColor={`${
-                    flash === "on" || flash === "auto" ? "black" : "white"
-                  }`}
-                  onPress={() => toggleFlash()}
-                />
-              </View>
-              <IconButton
-                className="w-8 h-8 transform rotate-45"
-                size="sm"
-                variant={`${torch === "on" ? "secondary" : "default"}`}
-                icon={Flashlight}
-                iconColor={`${torch === "on" ? "black" : "white"}`}
-                onPress={() =>
-                  setTorch((torch) => (torch === "on" ? "off" : "on"))
-                }
-              />
-              <View className=" w-10 h-8 rounded-full justify-center items-center">
-                <Text className="text-[10px] font-bold text-white">
-                  {camera.formats[0].maxFps}fps
-                </Text>
+                  variant={`${torch === "on" ? "secondary" : "default"}`}
+                  icon={Flashlight}
+                  iconColor={`${torch === "on" ? "black" : "white"}`}
+                  onPress={() =>
+                    setTorch((torch) => (torch === "on" ? "off" : "on"))
+                  }
+                /> */}
+                <View
+                  className={`w-6 h-6 rounded-full justify-center items-center`}
+                >
+                  <Text
+                    className={`text-[16px] font-bold ${
+                      flash === "auto" ? "text-white" : "text-black"
+                    }`}
+                  >
+                    A
+                  </Text>
+                </View>
+                <View className="w-14 h-8 rounded-full justify-center items-center">
+                  <Text className="text-[10px] font-bold text-white">
+                    00:00:00
+                  </Text>
+                </View>
+                <View className=" w-10 h-8 rounded-full justify-center items-center">
+                  <Text className="text-[10px] font-bold text-white">
+                    HD {camera.formats[0].maxFps}
+                  </Text>
+                </View>
               </View>
             </View>
             <IconButton
               className="w-10 h-10 transform rotate-45"
               size="md"
-              variant={"default"}
+              variant={"secondary"}
               icon={CogIcon}
               iconColor={"white"}
               onPress={() => {}}
@@ -199,24 +195,10 @@ const AppScreen = () => {
         </View>
       </View>
       <View className="p-4 justify-between">
-        <View>
-          <IconButton
-            className="w-10 h-10"
-            size="md"
-            variant={"default"}
-            icon={Grid2X2}
-            iconColor={"white"}
-            onPress={handleToggleGrid}
-          />
-          {/* <Text>
-            Width: {camera.formats[0].photoWidth} / height:{" "}
-            {camera.formats[0].photoHeight}
-          </Text>
-          <Text>Camera: {camera.name}</Text> */}
-        </View>
+        <Modes modes={modes} />
         <View className="flex-row p-4 w-full mx-auto justify-between items-center">
           <IconButton
-            className="w-14 h-14 rounded-xl"
+            className="w-16 h-16 rounded-full"
             size="md"
             variant="secondary"
             icon={ImageIcon}
@@ -228,19 +210,19 @@ const AppScreen = () => {
               Linking.openURL(link as string);
             }}
           />
-
+          {/*creer un un boutton person photo et vidéo*/}
           <IconButton
             className="w-20 h-20"
-            size="4xl"
+            size="6xl"
             variant="default"
             icon={Circle}
-            iconColor="white"
-            onPress={takePicture}
+            iconColor="#303030"
+            onPress={() => takePicture(cameraRef, flash)}
           />
-
           <IconButton
             className="w-12 h-12"
             size="md"
+            iconColor="white"
             variant="secondary"
             icon={SwitchCameraIcon}
             onPress={() =>
